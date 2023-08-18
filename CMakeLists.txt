@@ -6,8 +6,8 @@ set(PROJECT_NAME Bloom)
 
 project(${PROJECT_NAME} VERSION 1.0.0)
 
-find_package(SDL2 REQUIRED)
-find_package(glm REQUIRED)
+find_package(SDL2 CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
 
 add_subdirectory(src)
 add_subdirectory(external)
