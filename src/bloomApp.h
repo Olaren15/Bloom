@@ -2,6 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include <volk.h>
+#include <vector>
 
 namespace Bloom {
 
@@ -17,6 +18,8 @@ namespace Bloom {
         void initWindow();
         void initVulkan();
         void createInstance();
+        std::vector<char const*> getRequiredExtensions();
+        static bool areValidationLayersPresent();
         void mainLoop();
         void cleanup();
     };
