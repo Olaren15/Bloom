@@ -5,7 +5,7 @@
 #include <iostream>
 
 int main(int argc, char* argv[]) {
-    Bloom::BloomApp bloomApp{};
+    bloom::BloomApp bloomApp{};
 
     try {
         bloomApp.run();

@@ -1,11 +1,12 @@
 #pragma once
 
+#include "openGL/shader.h"
+#include "window/openGlWindow.h"
+
 #include <glad/glad.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
 #include <vector>
 
-namespace Bloom {
+namespace bloom {
 
     class BloomApp {
       public:
@@ -14,17 +15,11 @@ namespace Bloom {
         void run();
 
       private:
-        SDL_Window* window = nullptr;
-        SDL_GLContext glContext = nullptr;
-        bool windowShouldClose = false;
+        window::OpenGlWindow window;
         GLuint vao = 0;
-        GLuint shaderProgram = 0;
+        openGl::Shader shader;
 
-        void processEvents();
         void drawFrame();
-
-        static void validateShaderCompilation(GLuint shader);
-        static void validateShaderLinking(GLuint shaderProgram);
     };
 
-} // namespace Bloom
+} // namespace bloom
