@@ -2,8 +2,6 @@ add_executable(${PROJECT_NAME}
         main.cpp
         bloomApp.h
         bloomApp.cpp
-        validationHelper.cpp
-        validationHelper.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -11,4 +9,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
         $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
         volk::volk
+        glad
 )

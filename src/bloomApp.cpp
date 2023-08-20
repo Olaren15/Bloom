@@ -1,37 +1,61 @@
 #include "bloomApp.h"
 
-#include "validationHelper.h"
-
-#include <algorithm>
 #include <array>
-#include <cstring>
-#include <SDL2/SDL_vulkan.h>
+#include <cmath>
 #include <stdexcept>
 
 namespace Bloom {
     static constexpr int windowWidth = 1920;
     static constexpr int windowHeight = 1080;
 
-#ifdef NDEBUG
-    static constexpr bool enableValidationLayers = false;
-#else
-    static constexpr bool enableValidationLayers = true;
-#endif
+    // clang-format off
+    static constexpr std::array<GLfloat, 18> vertices{
+        // positions         // colors
+        0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
+        0.0f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f    // top
+    };
 
-    static constexpr std::array<const char*, 1> validationLayers{"VK_LAYER_KHRONOS_validation"};
+    static constexpr std::array<GLuint, 6> indices{
+        0, 1, 2,
+    };
+    // clang-format on
 
-    void BloomApp::run() {
-        initWindow();
-        initVulkan();
-        mainLoop();
-        cleanup();
-    }
+    static constexpr const char* vertexShaderSource =
+        "#version 460 core\n"
+        "layout (location = 0) in vec3 aPos;\n"
+        "layout (location = 1) in vec3 aColor;\n"
 
-    void BloomApp::initWindow() {
-        int error = SDL_Init(SDL_INIT_VIDEO);
+        "out vec3 ourColor;\n"
+
+        "void main()\n"
+        "{\n"
+        "    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+        "    ourColor = aColor;\n"
+        "}";
+
+    static constexpr const char* fragmentShaderSource =
+        "#version 460 core\n"
+        "out vec4 FragColor;\n"
+        "in vec3 ourColor;\n"
+
+        "void main()\n"
+        "{\n"
+        "    FragColor = vec4(ourColor, 1.0);\n"
+        "}";
+
+    BloomApp::BloomApp() {
+        int error = SDL_Init(SDL_INIT_EVERYTHING);
         if (error) {
             throw std::runtime_error(SDL_GetError());
         }
+
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+        SDL_GL_SetSwapInterval(-1);
 
         window = SDL_CreateWindow(
             "Bloom",
@@ -39,100 +63,127 @@ namespace Bloom {
             SDL_WINDOWPOS_CENTERED,
             windowWidth,
             windowHeight,
-            SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN
+            SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
         );
         if (!window) {
             throw std::runtime_error(SDL_GetError());
         }
-    }
 
-    void BloomApp::initVulkan() {
-        validateVkResult(volkInitialize());
-        createInstance();
-    }
-
-    void BloomApp::createInstance() {
-        VkApplicationInfo applicationInfo = {
-            .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-            .pApplicationName = "Bloom",
-            .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
-            .pEngineName = "Bloom",
-            .engineVersion = VK_MAKE_VERSION(1, 0, 0),
-            .apiVersion = VK_API_VERSION_1_0,
-        };
-
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "Simplify" // Do not ask to "simplify" condition based on enableValidationLayer since it
-                                          // changes when building in release or debug mode
-        if (enableValidationLayers && !areValidationLayersPresent()) {
-            throw std::runtime_error("Validation layers requested but not available");
-        }
-
-        auto requiredExtension = getRequiredExtensions();
-
-        VkInstanceCreateInfo instanceCreateInfo = {
-            .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-            .pApplicationInfo = &applicationInfo,
-            .enabledLayerCount = enableValidationLayers ? static_cast<uint32_t>(validationLayers.size()) : 0,
-            .ppEnabledLayerNames = enableValidationLayers ? validationLayers.data() : nullptr,
-            .enabledExtensionCount = static_cast<uint32_t>(requiredExtension.size()),
-            .ppEnabledExtensionNames = requiredExtension.data(),
-        };
-#pragma clang diagnostic pop
-
-        validateVkResult(vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
-        volkLoadInstance(instance);
-    }
-
-    std::vector<char const*> BloomApp::getRequiredExtensions() {
-        unsigned int count = 0;
-        SDL_bool success = SDL_Vulkan_GetInstanceExtensions(window, &count, nullptr);
-        if (!success) {
-            throw std::runtime_error(SDL_GetError());
-        }
-        std::vector<char const*> requiredExtensions{count};
-        success = SDL_Vulkan_GetInstanceExtensions(window, &count, requiredExtensions.data());
-        if (!success) {
+        glContext = SDL_GL_CreateContext(window);
+        if (!glContext) {
             throw std::runtime_error(SDL_GetError());
         }
 
-        return requiredExtensions;
+        if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
+            throw std::runtime_error("Failed to initialize GLAD");
+        }
+
+        glViewport(0, 0, windowWidth, windowHeight);
+
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+
+        GLuint vbo;
+        glGenBuffers(1, &vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+
+        GLuint ebo;
+        glGenBuffers(1, &ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void*>(0));
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(
+            1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void*>(3 * sizeof(GLfloat))
+        );
+        glEnableVertexAttribArray(1);
+
+        glBindVertexArray(0);
+
+        GLuint vertexShader;
+        vertexShader = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+        glCompileShader(vertexShader);
+        validateShaderCompilation(vertexShader);
+
+        GLuint fragmentShader;
+        fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+        glCompileShader(fragmentShader);
+        validateShaderCompilation(fragmentShader);
+
+        shaderProgram = glCreateProgram();
+        glAttachShader(shaderProgram, vertexShader);
+        glAttachShader(shaderProgram, fragmentShader);
+        glLinkProgram(shaderProgram);
+        validateShaderLinking(shaderProgram);
+
+        glUseProgram(shaderProgram);
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
     }
 
-    bool BloomApp::areValidationLayersPresent() {
-        uint32_t layerCount;
-        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-
-        std::vector<VkLayerProperties> availableLayers(layerCount);
-        vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-
-        return std::all_of(validationLayers.begin(), validationLayers.end(), [availableLayers](const char* layerName) {
-            return std::find_if(
-                       availableLayers.begin(),
-                       availableLayers.end(),
-                       [layerName](const VkLayerProperties& availableLayerProperties) {
-                           return strcmp(layerName, availableLayerProperties.layerName) == 0;
-                       }
-                   )
-                   != availableLayers.end();
-        });
+    BloomApp::~BloomApp() {
+        SDL_GL_DeleteContext(glContext);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
     }
 
-    void BloomApp::mainLoop() {
+    void BloomApp::run() {
         while (!windowShouldClose) {
-            SDL_Event event;
-            while (SDL_PollEvent(&event)) {
-                if (event.type == SDL_QUIT) {
-                    windowShouldClose = true;
+            processEvents();
+            drawFrame();
+            SDL_GL_SwapWindow(window);
+        }
+    }
+
+    void BloomApp::processEvents() {
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                windowShouldClose = true;
+            } else if (event.type == SDL_WINDOWEVENT) {
+                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                    glViewport(0, 0, event.window.data1, event.window.data2);
                 }
             }
         }
     }
 
-    void BloomApp::cleanup() {
-        vkDestroyInstance(instance, nullptr);
+    void BloomApp::drawFrame() {
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
 
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        glUseProgram(shaderProgram);
+        glBindVertexArray(vao);
+        glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+        glBindVertexArray(0);
+    }
+
+    void BloomApp::validateShaderCompilation(GLuint shader) {
+        GLint compilationSuccess = 0;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &compilationSuccess);
+        if (!compilationSuccess) {
+            GLint logLength = 0;
+            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
+            std::vector<GLchar> logMessage(logLength);
+            glGetShaderInfoLog(shader, logLength, nullptr, logMessage.data());
+            throw std::runtime_error(logMessage.data());
+        }
+    }
+
+    void BloomApp::validateShaderLinking(GLuint shaderProgram) {
+        GLint linkingSuccess = 0;
+        glGetProgramiv(shaderProgram, GL_LINK_STATUS, &linkingSuccess);
+        if (!linkingSuccess) {
+            GLint logLength = 0;
+            glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &logLength);
+            std::vector<GLchar> logMessage(logLength);
+            glGetProgramInfoLog(shaderProgram, logLength, nullptr, logMessage.data());
+            throw std::runtime_error(logMessage.data());
+        }
     }
 } // namespace Bloom
