@@ -4,7 +4,7 @@
 
 #include <vector>
 
-namespace bloom::openGl {
+namespace bloom::openGL {
     Shader::Shader(const std::filesystem::path& vertexPath, const std::filesystem::path& fragmentPath) {
         std::string vertexCode = filesystem::readFileToString(vertexPath);
         std::string fragmentCode = filesystem::readFileToString(fragmentPath);
@@ -70,4 +70,4 @@ namespace bloom::openGl {
         glDeleteProgram(programId);
     }
 
-} // namespace bloom::openGl
+} // namespace bloom::openGL

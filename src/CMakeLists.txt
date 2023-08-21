@@ -1,7 +1,7 @@
 add_executable(${PROJECT_NAME}
         main.cpp
-        bloomApp.h
-        bloomApp.cpp
+        openGlApp.h
+        openGlApp.cpp
         openGL/shader.cpp
         openGL/shader.h
         filesystem/fileReader.cpp
@@ -9,6 +9,10 @@ add_executable(${PROJECT_NAME}
         window/window.h
         window/openGlWindow.cpp
         window/openGlWindow.h
+        openGL/renderer.cpp
+        openGL/renderer.h
+        window/windowSize.h
+        openGL/material.h
 )
 
 target_compile_options(${PROJECT_NAME} PRIVATE

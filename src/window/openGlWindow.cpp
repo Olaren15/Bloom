@@ -1,12 +1,13 @@
 #include "openGlWindow.h"
 
+#include "glad/glad.h"
+
 #include <algorithm>
-#include <glad/glad.h>
 #include <stdexcept>
 
 namespace bloom::window {
 
-    OpenGlWindow::OpenGlWindow(const int& width, const int& height) {
+    OpenGlWindow::OpenGlWindow(int width, int height) {
         int error = SDL_Init(SDL_INIT_VIDEO);
         if (error) {
             throw std::runtime_error(SDL_GetError());
@@ -17,7 +18,10 @@ namespace bloom::window {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-        SDL_GL_SetSwapInterval(-1);
+        int setAdaptiveVsyncResult = SDL_GL_SetSwapInterval(-1);
+        if(!setAdaptiveVsyncResult) {
+            SDL_GL_SetSwapInterval(1);
+        }
 
         window = SDL_CreateWindow(
             "bloom",
@@ -48,7 +52,7 @@ namespace bloom::window {
         SDL_Quit();
     }
 
-    bool OpenGlWindow::isOpen() {
+    bool OpenGlWindow::isOpen() const {
         return !shouldWindowClose;
     }
 
@@ -67,6 +71,23 @@ namespace bloom::window {
                 }
             }
         }
+    }
+
+    WindowSize OpenGlWindow::getSize() const {
+        int width;
+        int height;
+
+        SDL_GetWindowSize(window, &width, &height);
+
+        return WindowSize{width, height};
+    }
+
+    int OpenGlWindow::getWidth() const {
+        return getSize().width;
+    }
+
+    int OpenGlWindow::getHeight() const {
+        return getSize().height;
     }
 
     void OpenGlWindow::addOnResizeCallback(const std::function<void(int, int)>& callback) {

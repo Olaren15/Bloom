@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <glad/glad.h>
 
-namespace bloom::openGl {
+namespace bloom::openGL {
 
     class Shader {
       public:
@@ -18,4 +18,4 @@ namespace bloom::openGl {
         static void validateShaderLinking(GLuint shaderProgram);
     };
 
-} // namespace bloom::openGl
+} // namespace bloom::openGL

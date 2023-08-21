@@ -1,6 +1,6 @@
 #pragma once
 
-#include "openGL/shader.h"
+#include "openGL/renderer.h"
 #include "window/openGlWindow.h"
 
 #include <glad/glad.h>
@@ -8,18 +8,14 @@
 
 namespace bloom {
 
-    class BloomApp {
+    class OpenGLApp {
       public:
-        BloomApp();
-        ~BloomApp();
+        OpenGLApp();
         void run();
 
       private:
         window::OpenGlWindow window;
-        GLuint vao = 0;
-        openGl::Shader shader;
-
-        void drawFrame();
+        openGL::Renderer renderer;
     };
 
 } // namespace bloom

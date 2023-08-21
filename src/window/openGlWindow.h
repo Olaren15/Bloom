@@ -6,11 +6,15 @@ namespace bloom::window {
 
     class OpenGlWindow : Window {
       public:
-        OpenGlWindow(const int& width, const int& height);
+        OpenGlWindow(int width, int height);
+        OpenGlWindow(const OpenGlWindow&) = delete;
         ~OpenGlWindow() override;
 
-        bool isOpen() override;
+        [[nodiscard]] bool isOpen() const override;
         void update() override;
+        [[nodiscard]] WindowSize getSize() const override;
+        [[nodiscard]] int getWidth() const override;
+        [[nodiscard]] int getHeight() const override;
         void addOnResizeCallback(const std::function<void(int, int)>& callback) override;
 
       private:
