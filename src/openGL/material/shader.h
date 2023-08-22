@@ -3,19 +3,19 @@
 #include <filesystem>
 #include <glad/glad.h>
 
-namespace bloom::openGL {
+namespace bloom::openGL::material {
 
-    class Shader {
+    struct Shader {
       public:
         Shader(const std::filesystem::path& vertexPath, const std::filesystem::path& fragmentPath);
+        Shader(const Shader& shader) = default;
         ~Shader();
-        void use() const;
-        [[nodiscard]] GLuint getId() const;
+
+        GLuint id;
 
       private:
-        GLuint programId;
         static void validateShaderCompilation(GLuint shader);
         static void validateShaderLinking(GLuint shaderProgram);
     };
 
-} // namespace bloom::openGL
+} // namespace bloom::openGL::material

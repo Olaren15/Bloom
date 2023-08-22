@@ -1,10 +1,10 @@
 #include "shader.h"
 
-#include "../filesystem/fileReader.h"
+#include "../../filesystem/fileReader.h"
 
 #include <vector>
 
-namespace bloom::openGL {
+namespace bloom::openGL::material {
     Shader::Shader(const std::filesystem::path& vertexPath, const std::filesystem::path& fragmentPath) {
         std::string vertexCode = filesystem::readFileToString(vertexPath);
         std::string fragmentCode = filesystem::readFileToString(fragmentPath);
@@ -24,22 +24,18 @@ namespace bloom::openGL {
         glCompileShader(fragmentShader);
         validateShaderCompilation(fragmentShader);
 
-        programId = glCreateProgram();
-        glAttachShader(programId, vertexShader);
-        glAttachShader(programId, fragmentShader);
-        glLinkProgram(programId);
-        validateShaderLinking(programId);
+        id = glCreateProgram();
+        glAttachShader(id, vertexShader);
+        glAttachShader(id, fragmentShader);
+        glLinkProgram(id);
+        validateShaderLinking(id);
 
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
     }
 
-    void Shader::use() const {
-        glUseProgram(programId);
-    }
-
-    GLuint Shader::getId() const {
-        return programId;
+    Shader::~Shader() {
+        glDeleteProgram(id);
     }
 
     void Shader::validateShaderCompilation(GLuint shader) {
@@ -64,10 +60,6 @@ namespace bloom::openGL {
             glGetProgramInfoLog(shaderProgram, logLength, nullptr, logMessage.data());
             throw std::runtime_error(logMessage.data());
         }
-    }
-
-    Shader::~Shader() {
-        glDeleteProgram(programId);
     }
 
 } // namespace bloom::openGL

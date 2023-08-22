@@ -1,10 +1,11 @@
 #pragma once
 
-#include <glad/glad.h>
-
-#include "shader.h"
 #include "../window/openGlWindow.h"
-#include "material.h"
+#include "material/material.h"
+#include "material/shader.h"
+#include "texture.h"
+
+#include <glad/glad.h>
 
 namespace bloom::openGL {
 
@@ -14,14 +15,17 @@ namespace bloom::openGL {
         Renderer(const Renderer&) = delete;
         ~Renderer();
 
-        void drawFrame();
+        void drawFrame() const;
 
       private:
         window::OpenGlWindow& window;
         GLuint vao = 0;
         GLuint vbo = 0;
         GLuint ebo = 0;
-        Shader shader;
-    };
+
+        material::Shader shader;
+        Texture rem;
+        Texture tramway;
+        material::Material defaultMaterial;};
 
 } // namespace bloom::openGL
