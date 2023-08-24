@@ -7,9 +7,8 @@
 
 namespace bloom::window {
 
-    OpenGlWindow::OpenGlWindow(int width, int height) {
-        int error = SDL_Init(SDL_INIT_VIDEO);
-        if (error) {
+    OpenGlWindow::OpenGlWindow(const int width, const int height) {
+        if (SDL_Init(SDL_INIT_VIDEO)) {
             throw std::runtime_error(SDL_GetError());
         }
 
@@ -18,8 +17,7 @@ namespace bloom::window {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-        int setAdaptiveVsyncResult = SDL_GL_SetSwapInterval(-1);
-        if(!setAdaptiveVsyncResult) {
+        if  (!SDL_GL_SetSwapInterval(-1)) {
             SDL_GL_SetSwapInterval(1);
         }
 
@@ -40,7 +38,7 @@ namespace bloom::window {
             throw std::runtime_error(SDL_GetError());
         }
 
-        // TODO
+        // TODO : move the glad loader elsewhere ?? (most likely in the renderer)
         if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
             throw std::runtime_error("Failed to initialize GLAD");
         }
@@ -65,7 +63,7 @@ namespace bloom::window {
                 shouldWindowClose = true;
             } else if (event.type == SDL_WINDOWEVENT) {
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                    std::for_each(onResizeCallbacks.begin(), onResizeCallbacks.end(), [event](const auto& callback) {
+                    std::ranges::for_each(onResizeCallbacks, [event](const auto& callback) {
                         callback(event.window.data1, event.window.data2);
                     });
                 }

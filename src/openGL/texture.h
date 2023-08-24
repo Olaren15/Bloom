@@ -6,7 +6,6 @@
 namespace bloom::openGL {
 
     struct Texture {
-      public:
         explicit Texture(const std::filesystem::path& imagePath);
         ~Texture();
         GLuint id = 0;

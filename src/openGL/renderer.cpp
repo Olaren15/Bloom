@@ -1,10 +1,11 @@
 #include "renderer.h"
 
 #include <array>
+#include <ranges>
 
 namespace bloom::openGL {
     // clang-format off
-    static constexpr std::array<GLfloat, 20> vertices{
+    static constexpr std::array<GLfloat, 20> Vertices{
         // positions            // texture uv
         -0.5f, 0.5f, 0.0f,      0.0f, 1.0f,   // top left
         0.5f, 0.5f, 0.0f,       1.0f, 1.0f,   // top right
@@ -12,40 +13,38 @@ namespace bloom::openGL {
         0.5f, -0.5f, 0.0f,      1.0f, 0.0f,   // bottom right
     };
 
-    static constexpr std::array<GLuint, 6> indices{
+    static constexpr std::array<GLuint, 6> Indices{
         0, 1, 3,
         0, 3, 2
     };
 
     // clang-format on
 
-    Renderer::Renderer(window::OpenGlWindow& window) :
-        window(window),
-        shader("data/shaders/openGL/default.vert.glsl", "data/shaders/openGL/default.frag.glsl"),
-        rem("data/images/rem.jpg"),
-        tramway("data/images/tramway.jpg"),
-        defaultMaterial(
-            shader,
+    Renderer::Renderer(window::OpenGlWindow* window) :
+        shader{"data/shaders/openGL/default.vert.glsl", "data/shaders/openGL/default.frag.glsl"},
+        rem{"data/images/rem.jpg"},
+        tramway{"data/images/tramway.jpg"},
+        defaultMaterial{
+            &shader,
             {{{"position"}, {0, {3, GL_FLOAT}}}, {"uv", {1, {2, GL_FLOAT}}}},
-            {{"rem", {0, 0, rem}}, {"tramway", {1, 1, tramway}}}
-        ) {
-        window.addOnResizeCallback([](int width, int height) { glViewport(0, 0, width, height); });
+            {{"rem", {0, 0, &rem}}, {"tramway", {1, 1, &tramway}}}} {
+        window->addOnResizeCallback([](const int width, const int height) { glViewport(0, 0, width, height); });
 
-        window::WindowSize windowSize = window.getSize();
-        glViewport(0, 0, windowSize.width, windowSize.height);
+        const auto [width, height] = window->getSize();
+        glViewport(0, 0, width, height);
 
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
 
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, Vertices.size() * sizeof(GLfloat), Vertices.data(), GL_STATIC_DRAW);
 
         glGenBuffers(1, &ebo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.size() * sizeof(GLuint), Indices.data(), GL_STATIC_DRAW);
 
-        auto positionInput = defaultMaterial.bufferInputs.at("position");
+        const auto& positionInput = defaultMaterial.bufferInputs.at("position");
         glVertexAttribPointer(
             positionInput.layoutLocation,
             positionInput.format.componentCount,
@@ -56,25 +55,25 @@ namespace bloom::openGL {
         );
         glEnableVertexAttribArray(positionInput.layoutLocation);
 
-        auto uvInput = defaultMaterial.bufferInputs.at("uv");
+        const auto& uvInput = defaultMaterial.bufferInputs.at("uv");
         glVertexAttribPointer(
             uvInput.layoutLocation,
             uvInput.format.componentCount,
             uvInput.format.unitType,
             GL_FALSE,
             5 * sizeof(GLfloat),
-            reinterpret_cast<GLvoid*>(3 * sizeof(GLfloat))
+            reinterpret_cast<GLvoid*>(3 * sizeof(GLfloat)) // NOLINT(performance-no-int-to-ptr)
         );
         glEnableVertexAttribArray(uvInput.layoutLocation);
 
         glBindVertexArray(0);
 
-        glUseProgram(defaultMaterial.shader.id);
+        glUseProgram(defaultMaterial.shader->id);
 
-        auto reemTextureInput = defaultMaterial.textureInputs.at("rem");
-        glUniform1i(reemTextureInput.layoutLocation, reemTextureInput.textureUnit);
+        const auto& remTextureInput = defaultMaterial.textureInputs.at("rem");
+        glUniform1i(remTextureInput.layoutLocation, remTextureInput.textureUnit);
 
-        auto tramwayTextureInput = defaultMaterial.textureInputs.at("tramway");
+        const auto& tramwayTextureInput = defaultMaterial.textureInputs.at("tramway");
         glUniform1i(tramwayTextureInput.layoutLocation, tramwayTextureInput.textureUnit);
     }
 
@@ -88,14 +87,14 @@ namespace bloom::openGL {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(defaultMaterial.shader.id);
+        glUseProgram(defaultMaterial.shader->id);
 
-        for (auto [texName, texInput] : defaultMaterial.textureInputs) {
-            glActiveTexture(GL_TEXTURE0 + texInput.textureUnit);
-            glBindTexture(GL_TEXTURE_2D, texInput.texture.id);
+        for (const auto& [layoutLocation, textureUnit, texture] : std::views::values(defaultMaterial.textureInputs)) {
+            glActiveTexture(GL_TEXTURE0 + textureUnit);
+            glBindTexture(GL_TEXTURE_2D, texture->id);
         }
         glBindVertexArray(vao);
-        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Indices.size()), GL_UNSIGNED_INT, nullptr);
         glBindVertexArray(0);
     }
 } // namespace bloom::openGL

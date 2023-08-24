@@ -20,6 +20,10 @@ add_executable(${PROJECT_NAME}
         openGL/material/textureInput.h
 )
 
+if(MSVC)
+    target_link_options(${PROJECT_NAME} PRIVATE "/SUBSYSTEM:WINDOWS")
+endif(MSVC)
+
 target_compile_options(${PROJECT_NAME} PRIVATE
         $<$<CXX_COMPILER_ID:MSVC>:/W4>
         $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>

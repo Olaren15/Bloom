@@ -1,10 +1,10 @@
 #include "openGlApp.h"
 
 namespace bloom {
-    static constexpr int windowWidth = 1920;
-    static constexpr int windowHeight = 1080;
+    static constexpr int WindowWidth = 1920;
+    static constexpr int WindowHeight = 1080;
 
-    OpenGLApp::OpenGLApp() : window(windowWidth, windowHeight), renderer(window) {}
+    OpenGLApp::OpenGLApp() : window(WindowWidth, WindowHeight), renderer(&window) {}
 
     void OpenGLApp::run() {
         while (window.isOpen()) {

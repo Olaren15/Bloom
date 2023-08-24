@@ -6,10 +6,14 @@
 namespace bloom::openGL::material {
 
     struct Shader {
-      public:
+        Shader() = delete;
         Shader(const std::filesystem::path& vertexPath, const std::filesystem::path& fragmentPath);
-        Shader(const Shader& shader) = default;
+        Shader(const Shader&) = delete;
+        Shader(const Shader&&) = delete;
         ~Shader();
+
+        Shader& operator=(const Shader&) = delete;
+        Shader& operator=(const Shader&&) = delete;
 
         GLuint id;
 

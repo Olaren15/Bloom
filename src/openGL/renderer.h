@@ -11,14 +11,18 @@ namespace bloom::openGL {
 
     class Renderer {
       public:
-        explicit Renderer(window::OpenGlWindow& window);
+        Renderer() = delete;
+        explicit Renderer(window::OpenGlWindow* window);
         Renderer(const Renderer&) = delete;
+        Renderer(const Renderer&&) = delete;
         ~Renderer();
+
+        Renderer& operator=(const Renderer&) = delete;
+        Renderer& operator=(const Renderer&&) = delete;
 
         void drawFrame() const;
 
       private:
-        window::OpenGlWindow& window;
         GLuint vao = 0;
         GLuint vbo = 0;
         GLuint ebo = 0;
@@ -26,6 +30,6 @@ namespace bloom::openGL {
         material::Shader shader;
         Texture rem;
         Texture tramway;
-        material::Material defaultMaterial;};
-
+        material::Material defaultMaterial;
+    };
 } // namespace bloom::openGL

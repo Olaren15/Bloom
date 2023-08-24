@@ -2,13 +2,19 @@
 
 #include "window.h"
 
+#include <SDL2/SDL.h>
+
 namespace bloom::window {
 
-    class OpenGlWindow : Window {
+    class OpenGlWindow final : public Window {
       public:
         OpenGlWindow(int width, int height);
         OpenGlWindow(const OpenGlWindow&) = delete;
+        OpenGlWindow(const OpenGlWindow&&) = delete;
         ~OpenGlWindow() override;
+
+        OpenGlWindow& operator=(const OpenGlWindow&) = delete;
+        OpenGlWindow& operator=(const OpenGlWindow&&) = delete;
 
         [[nodiscard]] bool isOpen() const override;
         void update() override;

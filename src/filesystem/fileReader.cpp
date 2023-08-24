@@ -8,7 +8,7 @@ namespace bloom::filesystem {
         fileStream.exceptions(std::ifstream::failbit | std::ifstream ::badbit);
 
         std::string content{};
-        content.reserve(std::filesystem::file_size(path));
+        content.reserve(file_size(path));
         content.assign(std::istreambuf_iterator<char>(fileStream), std::istreambuf_iterator<char>());
 
         return content;

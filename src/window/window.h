@@ -3,12 +3,17 @@
 #include "windowSize.h"
 
 #include <functional>
-#include <SDL2/SDL.h>
 
 namespace bloom::window {
     class Window {
       public:
+        Window() = default;
+        Window(const Window&) = delete;
+        Window(const Window&&) = delete;
         virtual ~Window() = default;
+
+        Window& operator=(const Window&) = delete;
+        Window& operator=(const Window&&) = delete;
 
         [[nodiscard]] virtual bool isOpen() const = 0;
         virtual void update() = 0;

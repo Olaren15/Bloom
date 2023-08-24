@@ -7,7 +7,7 @@ namespace bloom::openGL {
         int width;
         int height;
         int channels;
-        std::string path = imagePath.string();
+        const std::string path = imagePath.string();
         stbi_set_flip_vertically_on_load(true);
         uint8_t* data = stbi_load(path.c_str(), &width, &height, &channels, 3);
 
