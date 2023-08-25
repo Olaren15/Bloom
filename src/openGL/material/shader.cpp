@@ -60,4 +60,4 @@ namespace bloom::openGL::material {
         }
     }
 
-} // namespace bloom::openGL::material
+}

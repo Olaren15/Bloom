@@ -1,25 +1,15 @@
 #include "renderer.h"
 
-#include <array>
+#include "model/cube.h"
+#include "model/vertex.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <ranges>
+#include <SDL_timer.h>
 
 namespace bloom::openGL {
-    // clang-format off
-    static constexpr std::array<GLfloat, 20> Vertices{
-        // positions            // texture uv
-        -0.5f, 0.5f, 0.0f,      0.0f, 1.0f,   // top left
-        0.5f, 0.5f, 0.0f,       1.0f, 1.0f,   // top right
-        -0.5f, -0.5f, 0.0f,     0.0f, 0.0f,   // bottom left
-        0.5f, -0.5f, 0.0f,      1.0f, 0.0f,   // bottom right
-    };
-
-    static constexpr std::array<GLuint, 6> Indices{
-        0, 1, 3,
-        0, 3, 2
-    };
-
-    // clang-format on
-
     Renderer::Renderer(window::OpenGlWindow* window) :
         shader{"data/shaders/openGL/default.vert.glsl", "data/shaders/openGL/default.frag.glsl"},
         rem{"data/images/rem.jpg"},
@@ -27,22 +17,35 @@ namespace bloom::openGL {
         defaultMaterial{
             &shader,
             {{{"position"}, {0, {3, GL_FLOAT}}}, {"uv", {1, {2, GL_FLOAT}}}},
-            {{"rem", {0, 0, &rem}}, {"tramway", {1, 1, &tramway}}}} {
+            {{"rem", {2, 0, &rem}}, {"tramway", {3, 1, &tramway}}},
+            {{"model", {0}}, {"projection", {1}}}} {
         window->addOnResizeCallback([](const int width, const int height) { glViewport(0, 0, width, height); });
 
         const auto [width, height] = window->getSize();
         glViewport(0, 0, width, height);
+
+        glEnable(GL_DEPTH_TEST);
 
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
 
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, Vertices.size() * sizeof(GLfloat), Vertices.data(), GL_STATIC_DRAW);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            static_cast<GLsizeiptr>(Cube.vertices.size() * sizeof(model::Vertex)),
+            Cube.vertices.data(),
+            GL_STATIC_DRAW
+        );
 
         glGenBuffers(1, &ebo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.size() * sizeof(GLuint), Indices.data(), GL_STATIC_DRAW);
+        glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER,
+            static_cast<GLsizeiptr>(Cube.indices.size() * sizeof(model::Index)),
+            Cube.indices.data(),
+            GL_STATIC_DRAW
+        );
 
         const auto& positionInput = defaultMaterial.bufferInputs.at("position");
         glVertexAttribPointer(
@@ -50,8 +53,8 @@ namespace bloom::openGL {
             positionInput.format.componentCount,
             positionInput.format.unitType,
             GL_FALSE,
-            5 * sizeof(GLfloat),
-            reinterpret_cast<GLvoid*>(0)
+            sizeof(model::Vertex),
+            reinterpret_cast<GLvoid*>(offsetof(model::Vertex, position)) // NOLINT(performance-no-int-to-ptr)
         );
         glEnableVertexAttribArray(positionInput.layoutLocation);
 
@@ -61,20 +64,16 @@ namespace bloom::openGL {
             uvInput.format.componentCount,
             uvInput.format.unitType,
             GL_FALSE,
-            5 * sizeof(GLfloat),
-            reinterpret_cast<GLvoid*>(3 * sizeof(GLfloat)) // NOLINT(performance-no-int-to-ptr)
+            sizeof(model::Vertex),
+            reinterpret_cast<GLvoid*>(offsetof(model::Vertex, uv)) // NOLINT(performance-no-int-to-ptr)
         );
         glEnableVertexAttribArray(uvInput.layoutLocation);
-
         glBindVertexArray(0);
 
         glUseProgram(defaultMaterial.shader->id);
-
-        const auto& remTextureInput = defaultMaterial.textureInputs.at("rem");
-        glUniform1i(remTextureInput.layoutLocation, remTextureInput.textureUnit);
-
-        const auto& tramwayTextureInput = defaultMaterial.textureInputs.at("tramway");
-        glUniform1i(tramwayTextureInput.layoutLocation, tramwayTextureInput.textureUnit);
+        for (const auto& [layoutLocation, textureUnit, texture] : std::views::values(defaultMaterial.textureInputs)) {
+            glUniform1i(layoutLocation, textureUnit);
+        }
     }
 
     Renderer::~Renderer() {
@@ -85,7 +84,7 @@ namespace bloom::openGL {
 
     void Renderer::drawFrame() const {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(defaultMaterial.shader->id);
 
@@ -93,8 +92,25 @@ namespace bloom::openGL {
             glActiveTexture(GL_TEXTURE0 + textureUnit);
             glBindTexture(GL_TEXTURE_2D, texture->id);
         }
+
+        auto model = rotate(
+            glm::identity<glm::mat4>(),
+            static_cast<float>(SDL_GetTicks64()) / 1000.0f * glm::radians(-50.0f),
+            glm::vec3{0.0f, 1.0f, 0.0f}
+        );
+        const auto view =
+            lookAt(glm::vec3{-1.0f, 1.0f, 2.0f}, glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
+        glm::mat4 projection = glm::perspective(glm::radians(90.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
+        projection = projection * view;
+
+        glUniformMatrix4fv(defaultMaterial.uniformInputs.at("model").layoutLocation, 1, GL_FALSE, value_ptr(model));
+        glUniformMatrix4fv(
+            defaultMaterial.uniformInputs.at("projection").layoutLocation, 1, GL_FALSE, value_ptr(projection)
+        );
+
         glBindVertexArray(vao);
-        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Indices.size()), GL_UNSIGNED_INT, nullptr);
+
+        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Cube.indices.size()), GL_UNSIGNED_INT, nullptr);
         glBindVertexArray(0);
     }
-} // namespace bloom::openGL
+}

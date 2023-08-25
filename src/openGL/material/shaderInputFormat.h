@@ -11,4 +11,4 @@ namespace bloom::openGL::material {
         GLenum unitType;
     };
 
-} // namespace bloom::openGL::material
+}

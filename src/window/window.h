@@ -5,6 +5,8 @@
 #include <functional>
 
 namespace bloom::window {
+    using OnResizeCallback = std::function<void(int newWidth, int newHeight)>;
+
     class Window {
       public:
         Window() = default;
@@ -20,6 +22,6 @@ namespace bloom::window {
         [[nodiscard]] virtual WindowSize getSize() const = 0;
         [[nodiscard]] virtual int getWidth() const = 0;
         [[nodiscard]] virtual int getHeight() const = 0;
-        virtual void addOnResizeCallback(const std::function<void(int newWidth, int newHeight)>& callback) = 0;
+        virtual void addOnResizeCallback(const OnResizeCallback& callback) = 0;
     };
-} // namespace bloom::window
+}

@@ -13,4 +13,4 @@ namespace bloom::openGL::material {
         ShaderInputFormat format;
     };
 
-} // namespace bloom::openGL::material
+}

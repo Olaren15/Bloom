@@ -18,11 +18,15 @@ add_executable(${PROJECT_NAME}
         openGL/material/bufferInput.h
         openGL/material/shaderInputFormat.h
         openGL/material/textureInput.h
+        openGL/material/uniformInput.h
+        openGL/model/model.h
+        openGL/model/vertex.h
+        openGL/model/cube.h
 )
 
-if(MSVC)
+if(MSVC AND CMAKE_BUILD_TYPE STREQUAL "Release")
     target_link_options(${PROJECT_NAME} PRIVATE "/SUBSYSTEM:WINDOWS")
-endif(MSVC)
+endif()
 
 target_compile_options(${PROJECT_NAME} PRIVATE
         $<$<CXX_COMPILER_ID:MSVC>:/W4>

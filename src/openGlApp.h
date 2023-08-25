@@ -15,4 +15,4 @@ namespace bloom {
         openGL::Renderer renderer;
     };
 
-} // namespace bloom
+}

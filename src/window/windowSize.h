@@ -7,4 +7,4 @@ namespace bloom::window {
         int height;
     };
 
-} // namespace bloom::window
+}

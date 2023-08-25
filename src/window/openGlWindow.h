@@ -2,10 +2,10 @@
 
 #include "window.h"
 
-#include <SDL2/SDL.h>
+// ReSharper disable once CppInconsistentNaming
+struct SDL_Window;
 
 namespace bloom::window {
-
     class OpenGlWindow final : public Window {
       public:
         OpenGlWindow(int width, int height);
@@ -21,13 +21,13 @@ namespace bloom::window {
         [[nodiscard]] WindowSize getSize() const override;
         [[nodiscard]] int getWidth() const override;
         [[nodiscard]] int getHeight() const override;
-        void addOnResizeCallback(const std::function<void(int, int)>& callback) override;
+        void addOnResizeCallback(const OnResizeCallback& callback) override;
 
       private:
         SDL_Window* window = nullptr;
-        SDL_GLContext glContext = nullptr;
+        void* glContext = nullptr;
         bool shouldWindowClose = false;
-        std::vector<std::function<void(int, int)>> onResizeCallbacks{};
+        std::vector<OnResizeCallback> onResizeCallbacks{};
     };
 
-} // namespace bloom::window
+}

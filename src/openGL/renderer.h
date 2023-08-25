@@ -32,4 +32,4 @@ namespace bloom::openGL {
         Texture tramway;
         material::Material defaultMaterial;
     };
-} // namespace bloom::openGL
+}

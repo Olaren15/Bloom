@@ -1,8 +1,8 @@
 #include "openGlWindow.h"
 
-#include "glad/glad.h"
-
 #include <algorithm>
+#include <glad/glad.h>
+#include <SDL2/SDL.h>
 #include <stdexcept>
 
 namespace bloom::window {
@@ -17,7 +17,7 @@ namespace bloom::window {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-        if  (!SDL_GL_SetSwapInterval(-1)) {
+        if (!SDL_GL_SetSwapInterval(-1)) {
             SDL_GL_SetSwapInterval(1);
         }
 
@@ -88,7 +88,7 @@ namespace bloom::window {
         return getSize().height;
     }
 
-    void OpenGlWindow::addOnResizeCallback(const std::function<void(int, int)>& callback) {
+    void OpenGlWindow::addOnResizeCallback(const OnResizeCallback& callback) {
         onResizeCallbacks.push_back(callback);
     }
 

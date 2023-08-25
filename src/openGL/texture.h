@@ -11,4 +11,4 @@ namespace bloom::openGL {
         GLuint id = 0;
     };
 
-} // namespace bloom::openGL
+}
