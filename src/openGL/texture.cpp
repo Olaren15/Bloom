@@ -18,7 +18,7 @@ namespace bloom::openGL {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        
+
         float maxSupportedAnisotropicFiltering = 0.0f;
         glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxSupportedAnisotropicFiltering);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, maxSupportedAnisotropicFiltering);
@@ -33,4 +33,4 @@ namespace bloom::openGL {
     Texture::~Texture() {
         glDeleteTextures(1, &id);
     }
-}
+} // namespace bloom::openGL

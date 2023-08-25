@@ -30,4 +30,4 @@ namespace bloom::window {
         std::vector<OnResizeCallback> onResizeCallbacks{};
     };
 
-}
+} // namespace bloom::window

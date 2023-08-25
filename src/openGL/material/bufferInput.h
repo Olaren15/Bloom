@@ -1,8 +1,8 @@
 #pragma once
 
-#include <glad/glad.h>
-
 #include "shaderInputFormat.h"
+
+#include <glad/glad.h>
 
 namespace bloom::openGL::material {
 
@@ -13,4 +13,4 @@ namespace bloom::openGL::material {
         ShaderInputFormat format;
     };
 
-}
+} // namespace bloom::openGL::material

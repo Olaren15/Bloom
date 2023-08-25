@@ -19,10 +19,10 @@ namespace bloom::openGL {
             {{{"position"}, {0, {3, GL_FLOAT}}}, {"uv", {1, {2, GL_FLOAT}}}},
             {{"rem", {2, 0, &rem}}, {"tramway", {3, 1, &tramway}}},
             {{"model", {0}}, {"projection", {1}}}} {
-        window->addOnResizeCallback([](const int width, const int height) { glViewport(0, 0, width, height); });
+        window->addOnResizeCallback([this](const int width, const int height) { onWindowResize(width, height); });
 
         const auto [width, height] = window->getSize();
-        glViewport(0, 0, width, height);
+        onWindowResize(width, height);
 
         glEnable(GL_DEPTH_TEST);
 
@@ -100,7 +100,7 @@ namespace bloom::openGL {
         );
         const auto view =
             lookAt(glm::vec3{-1.0f, 1.0f, 2.0f}, glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
-        glm::mat4 projection = glm::perspective(glm::radians(90.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(90.0f), aspectRatio, 0.1f, 100.0f);
         projection = projection * view;
 
         glUniformMatrix4fv(defaultMaterial.uniformInputs.at("model").layoutLocation, 1, GL_FALSE, value_ptr(model));
@@ -113,4 +113,9 @@ namespace bloom::openGL {
         glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Cube.indices.size()), GL_UNSIGNED_INT, nullptr);
         glBindVertexArray(0);
     }
-}
+
+    void Renderer::onWindowResize(const int width, const int height) {
+        glViewport(0, 0, width, height);
+        aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+    }
+} // namespace bloom::openGL

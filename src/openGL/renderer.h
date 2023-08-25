@@ -23,6 +23,8 @@ namespace bloom::openGL {
         void drawFrame() const;
 
       private:
+        float aspectRatio = 0.0f;
+
         GLuint vao = 0;
         GLuint vbo = 0;
         GLuint ebo = 0;
@@ -31,5 +33,7 @@ namespace bloom::openGL {
         Texture rem;
         Texture tramway;
         material::Material defaultMaterial;
+
+        void onWindowResize(int width, int height);
     };
-}
+} // namespace bloom::openGL

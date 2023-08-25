@@ -1,7 +1,7 @@
 #pragma once
 
-#include <glad/glad.h>
 #include <filesystem>
+#include <glad/glad.h>
 
 namespace bloom::openGL {
 
@@ -11,4 +11,4 @@ namespace bloom::openGL {
         GLuint id = 0;
     };
 
-}
+} // namespace bloom::openGL

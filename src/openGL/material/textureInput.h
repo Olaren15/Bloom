@@ -15,4 +15,4 @@ namespace bloom::openGL::material {
         Texture* texture;
     };
 
-}
+} // namespace bloom::openGL::material

@@ -21,4 +21,4 @@ namespace bloom::openGL::material {
         std::unordered_map<std::string, UniformInput> uniformInputs;
     };
 
-}
+} // namespace bloom::openGL::material

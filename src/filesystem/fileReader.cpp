@@ -13,4 +13,4 @@ namespace bloom::filesystem {
 
         return content;
     }
-}
+} // namespace bloom::filesystem
