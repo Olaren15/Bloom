@@ -14,6 +14,7 @@ namespace bloom::openGL::material {
 
         Shader& operator=(const Shader&) = delete;
         Shader& operator=(const Shader&&) = delete;
+        operator GLuint() const;
 
         GLuint id;
 

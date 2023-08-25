@@ -70,7 +70,7 @@ namespace bloom::openGL {
         glEnableVertexAttribArray(uvInput.layoutLocation);
         glBindVertexArray(0);
 
-        glUseProgram(defaultMaterial.shader->id);
+        glUseProgram(*defaultMaterial.shader);
         for (const auto& [layoutLocation, textureUnit, texture] : std::views::values(defaultMaterial.textureInputs)) {
             glUniform1i(layoutLocation, textureUnit);
         }
@@ -86,11 +86,11 @@ namespace bloom::openGL {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUseProgram(defaultMaterial.shader->id);
+        glUseProgram(*defaultMaterial.shader);
 
         for (const auto& [layoutLocation, textureUnit, texture] : std::views::values(defaultMaterial.textureInputs)) {
             glActiveTexture(GL_TEXTURE0 + textureUnit);
-            glBindTexture(GL_TEXTURE_2D, texture->id);
+            glBindTexture(GL_TEXTURE_2D, *texture);
         }
 
         auto model = rotate(

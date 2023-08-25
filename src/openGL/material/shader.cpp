@@ -36,6 +36,10 @@ namespace bloom::openGL::material {
         glDeleteProgram(id);
     }
 
+    Shader::operator GLuint() const {
+        return id;
+    }
+
     void Shader::validateShaderCompilation(const GLuint shader) {
         GLint compilationSuccess = 0;
         glGetShaderiv(shader, GL_COMPILE_STATUS, &compilationSuccess);

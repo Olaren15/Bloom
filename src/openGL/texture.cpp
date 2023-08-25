@@ -33,4 +33,8 @@ namespace bloom::openGL {
     Texture::~Texture() {
         glDeleteTextures(1, &id);
     }
+
+    Texture::operator unsigned() const {
+        return id;
+    }
 } // namespace bloom::openGL
