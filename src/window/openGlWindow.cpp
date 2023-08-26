@@ -1,4 +1,4 @@
-#include "openGlWindow.h"
+#include "openGlWindow.hpp"
 
 #include <algorithm>
 #include <glad/glad.h>
@@ -61,6 +61,7 @@ namespace bloom::window {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 shouldWindowClose = true;
+                break;
             } else if (event.type == SDL_WINDOWEVENT) {
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                     std::ranges::for_each(onResizeCallbacks, [event](const auto& callback) {

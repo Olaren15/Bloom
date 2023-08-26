@@ -1,11 +1,9 @@
 #pragma once
 
-#include "../window/openGlWindow.h"
-#include "material/material.h"
-#include "material/shader.h"
-#include "texture.h"
+#include "../window/openGlWindow.hpp"
+#include "model/model.hpp"
+#include "shader.hpp"
 
-#include <glad/glad.h>
 
 namespace bloom::openGL {
 
@@ -13,9 +11,10 @@ namespace bloom::openGL {
       public:
         Renderer() = delete;
         explicit Renderer(window::OpenGlWindow* window);
+        void updateMatrices() const;
         Renderer(const Renderer&) = delete;
         Renderer(const Renderer&&) = delete;
-        ~Renderer();
+        ~Renderer() = default;
 
         Renderer& operator=(const Renderer&) = delete;
         Renderer& operator=(const Renderer&&) = delete;
@@ -25,14 +24,8 @@ namespace bloom::openGL {
       private:
         float aspectRatio = 0.0f;
 
-        GLuint vao = 0;
-        GLuint vbo = 0;
-        GLuint ebo = 0;
-
-        material::Shader shader;
-        Texture rem;
-        Texture tramway;
-        material::Material defaultMaterial;
+        Shader shader;
+        model::Model model;
 
         void onWindowResize(int width, int height);
     };

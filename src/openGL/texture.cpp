@@ -1,9 +1,9 @@
-#include "texture.h"
+#include "texture.hpp"
 
 #include <stb_image.h>
 
 namespace bloom::openGL {
-    Texture::Texture(const std::filesystem::path& imagePath) {
+    Texture::Texture(const std::filesystem::path& imagePath) : originalPath(imagePath) {
         int width;
         int height;
         int channels;
@@ -30,11 +30,31 @@ namespace bloom::openGL {
         stbi_image_free(data);
     }
 
+    Texture::Texture(Texture&& other) noexcept {
+        id = other.id;
+        originalPath = other.originalPath;
+
+        other.id = 0;
+        other.originalPath = "";
+    }
+
     Texture::~Texture() {
         glDeleteTextures(1, &id);
     }
 
-    Texture::operator unsigned() const {
+    Texture& Texture::operator=(Texture&& other) noexcept {
+        glDeleteTextures(1, &id);
+
+        id = other.id;
+        originalPath = other.originalPath;
+
+        other.id = 0;
+        other.originalPath = "";
+
+        return *this;
+    }
+
+    Texture::operator GLuint() const {
         return id;
     }
 } // namespace bloom::openGL

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "windowSize.h"
+#include "windowSize.hpp"
 
 #include <functional>
 

@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <glad/glad.h>
 
-namespace bloom::openGL::material {
+namespace bloom::openGL {
 
     struct Shader {
         Shader() = delete;
@@ -23,4 +23,4 @@ namespace bloom::openGL::material {
         static void validateShaderLinking(GLuint shaderProgram);
     };
 
-} // namespace bloom::openGL::material
+} // namespace bloom::openGL::shader

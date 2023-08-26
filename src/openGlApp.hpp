@@ -1,7 +1,7 @@
 #pragma once
 
-#include "openGL/renderer.h"
-#include "window/openGlWindow.h"
+#include "openGL/renderer.hpp"
+#include "window/openGlWindow.hpp"
 
 namespace bloom {
 

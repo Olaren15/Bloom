@@ -1,27 +1,25 @@
 add_executable(${PROJECT_NAME}
-        main.cpp
-        openGlApp.h
-        openGlApp.cpp
-        openGL/material/shader.cpp
-        openGL/material/shader.h
-        filesystem/fileReader.cpp
-        filesystem/fileReader.h
-        window/window.h
-        window/openGlWindow.cpp
-        window/openGlWindow.h
-        openGL/renderer.cpp
-        openGL/renderer.h
-        window/windowSize.h
-        openGL/material/material.h
-        openGL/texture.cpp
-        openGL/texture.h
-        openGL/material/bufferInput.h
-        openGL/material/shaderInputFormat.h
-        openGL/material/textureInput.h
-        openGL/material/uniformInput.h
-        openGL/model/model.h
-        openGL/model/vertex.h
-        openGL/model/cube.h
+        "main.cpp"
+        "openGlApp.hpp"
+        "openGlApp.cpp"
+        "openGL/shader.cpp"
+        "openGL/shader.hpp"
+        "filesystem/fileReader.cpp"
+        "filesystem/fileReader.hpp"
+        "window/window.hpp"
+        "window/openGlWindow.cpp"
+        "window/openGlWindow.hpp"
+        "openGL/renderer.cpp"
+        "openGL/renderer.hpp"
+        "window/windowSize.hpp"
+        "openGL/texture.cpp"
+        "openGL/texture.hpp"
+        "openGL/model/model.hpp"
+        "openGL/model/vertex.hpp"
+        "openGL/model/mesh.hpp"
+        "openGL/model/mesh.cpp"
+        "openGL/model/modelImporter.hpp"
+        "openGL/model/modelImporter.cpp"
 )
 
 if(MSVC AND CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -37,6 +35,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         $<IF:$<TARGET_EXISTS:glm::glm>,glm::glm,glm>
         $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
         $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+        assimp::assimp
         glad
         stb
 )

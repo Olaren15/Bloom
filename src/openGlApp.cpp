@@ -1,4 +1,4 @@
-#include "openGlApp.h"
+#include "openGlApp.hpp"
 
 namespace bloom {
     static constexpr int WindowWidth = 1920;

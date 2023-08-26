@@ -1,10 +1,10 @@
-#include "shader.h"
+#include "shader.hpp"
 
-#include "../../filesystem/fileReader.h"
+#include "../filesystem/fileReader.hpp"
 
 #include <vector>
 
-namespace bloom::openGL::material {
+namespace bloom::openGL {
     Shader::Shader(const std::filesystem::path& vertexPath, const std::filesystem::path& fragmentPath) {
         const std::string vertexCode = filesystem::readFileToString(vertexPath);
         const std::string fragmentCode = filesystem::readFileToString(fragmentPath);

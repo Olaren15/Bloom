@@ -1,6 +1,6 @@
 #pragma once
 
-#include "window.h"
+#include "window.hpp"
 
 // ReSharper disable once CppInconsistentNaming
 struct SDL_Window;
