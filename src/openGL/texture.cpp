@@ -12,6 +12,7 @@ namespace bloom::openGL {
         uint8_t* data = stbi_load(path.c_str(), &width, &height, &channels, 3);
 
         glGenTextures(1, &id);
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, id);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
