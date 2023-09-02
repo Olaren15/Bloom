@@ -9,6 +9,12 @@
 #include <iostream>
 #include <SDL_timer.h>
 
+constexpr float MillisecondsPerSeconds = 1000.0F;
+constexpr float RotationDegreesPerSecond = 50.0F;
+constexpr float FieldOfView = 90.0F;
+constexpr float NearPlane = 0.1F;
+constexpr float FarPlane = 100.0F;
+
 namespace bloom::openGL {
     Renderer::Renderer(window::OpenGlWindow* window) :
       shader{"data/shaders/openGL/default.vert.glsl", "data/shaders/openGL/default.frag.glsl"},
@@ -21,23 +27,22 @@ namespace bloom::openGL {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_DEBUG_OUTPUT);
         glDebugMessageCallback(
-            [](GLenum source,
-               GLenum type,
-               GLuint id,
-               GLenum severity,
-               GLsizei length,
+            []([[maybe_unused]] GLenum source, // NOLINT(*-easily-swappable-parameters)
+               [[maybe_unused]] GLenum type,
+               [[maybe_unused]] GLuint id, // NOLINT(*-identifier-length)
+               [[maybe_unused]] GLenum severity,
+               [[maybe_unused]] GLsizei length,
                const GLchar* message,
-               const void* userParam) { std::cout << message << "\n"; },
+               [[maybe_unused]] const void* userParam) { std::cout << message << "\n"; },
             nullptr
         );
     }
 
     void Renderer::drawFrame() const {
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(shader);
-
         updateMatrices();
 
         for (const model::Mesh& mesh : model.meshes) {
@@ -53,12 +58,12 @@ namespace bloom::openGL {
     void Renderer::updateMatrices() const {
         auto modelMat = rotate(
             glm::identity<glm::mat4>(),
-            static_cast<float>(SDL_GetTicks64()) / 1000.0f * glm::radians(-50.0f),
-            glm::vec3{0.0f, 1.0f, 0.0f}
+            static_cast<float>(SDL_GetTicks64()) / MillisecondsPerSeconds * glm::radians(RotationDegreesPerSecond),
+            glm::vec3{0.0F, 1.0F, 0.0F}
         );
         const auto viewMat =
-            lookAt(glm::vec3{0.0f, 1.0f, 4.0f}, glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
-        glm::mat4 projectionMat = glm::perspective(glm::radians(90.0f), aspectRatio, 0.1f, 100.0f);
+            lookAt(glm::vec3{0.0F, 1.0F, 4.0F}, glm::vec3{0.0F, 0.0F, 0.0F}, glm::vec3{0.0F, 1.0F, 0.0F});
+        glm::mat4 projectionMat = glm::perspective(glm::radians(FieldOfView), aspectRatio, NearPlane, FarPlane);
         const auto combinedProjectionViewMat = projectionMat * viewMat;
 
         glUniformMatrix4fv(0, 1, GL_FALSE, value_ptr(modelMat));

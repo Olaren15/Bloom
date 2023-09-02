@@ -1,9 +1,8 @@
 #pragma once
 
-#include "../window/openGlWindow.hpp"
+#include "../window/impl/openGlWindow.hpp"
 #include "model/model.hpp"
 #include "shader.hpp"
-
 
 namespace bloom::openGL {
 
@@ -22,7 +21,7 @@ namespace bloom::openGL {
         void drawFrame() const;
 
       private:
-        float aspectRatio = 0.0f;
+        float aspectRatio = 0.0F;
 
         Shader shader;
         model::Model model;

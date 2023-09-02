@@ -14,7 +14,7 @@ namespace bloom::openGL {
 
         Texture& operator=(const Texture& other) = delete;
         Texture& operator=(Texture&& other) noexcept;
-        operator GLuint() const;
+        operator GLuint() const; // NOLINT(*-explicit-constructor)
 
         GLuint id = 0;
         std::filesystem::path originalPath;

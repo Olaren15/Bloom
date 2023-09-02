@@ -32,7 +32,8 @@ namespace bloom::openGL::model {
             GL_FLOAT,
             GL_FALSE,
             sizeof(Vertex),
-            reinterpret_cast<GLvoid*>(offsetof(Vertex, position)) // NOLINT(performance-no-int-to-ptr)
+            reinterpret_cast<GLvoid*>(offsetof(Vertex, position)
+            ) // NOLINT(performance-no-int-to-ptr, cppcoreguidelines-pro-type-reinterpret-cast)
         );
         glEnableVertexAttribArray(0);
 
@@ -42,7 +43,8 @@ namespace bloom::openGL::model {
             GL_FLOAT,
             GL_FALSE,
             sizeof(Vertex),
-            reinterpret_cast<GLvoid*>(offsetof(Vertex, normal)) // NOLINT(performance-no-int-to-ptr)
+            reinterpret_cast<GLvoid*>(offsetof(Vertex, normal)
+            ) // NOLINT(performance-no-int-to-ptr, cppcoreguidelines-pro-type-reinterpret-cast)
         );
         glEnableVertexAttribArray(1);
 
@@ -52,7 +54,8 @@ namespace bloom::openGL::model {
             GL_FLOAT,
             GL_FALSE,
             sizeof(Vertex),
-            reinterpret_cast<GLvoid*>(offsetof(Vertex, uv)) // NOLINT(performance-no-int-to-ptr)
+            reinterpret_cast<GLvoid*>(offsetof(Vertex, uv)
+            ) // NOLINT(performance-no-int-to-ptr, cppcoreguidelines-pro-type-reinterpret-cast)
         );
         glEnableVertexAttribArray(2);
 
@@ -60,11 +63,12 @@ namespace bloom::openGL::model {
     }
 
     Mesh::Mesh(Mesh&& other) noexcept :
-      vertices(std::move(other.vertices)), indices(std::move(other.indices)), texture(std::move(other.texture)) {
-        vertexBuffer = other.vertexBuffer;
-        indexBuffer = other.indexBuffer;
-        vertexArray = other.vertexArray;
-
+      vertices(std::move(other.vertices)),
+      indices(std::move(other.indices)),
+      texture(std::move(other.texture)),
+      vertexBuffer(other.vertexBuffer),
+      indexBuffer(other.indexBuffer),
+      vertexArray(other.vertexArray) {
         other.vertexBuffer = 0;
         other.indexBuffer = 0;
         other.vertexArray = 0;

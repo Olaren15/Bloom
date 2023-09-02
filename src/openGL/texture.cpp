@@ -4,11 +4,11 @@
 
 namespace bloom::openGL {
     Texture::Texture(const std::filesystem::path& imagePath) : originalPath(imagePath) {
-        int width;
-        int height;
-        int channels;
+        int width = 0;
+        int height = 0;
+        int channels = 0;
         const std::string path = imagePath.string();
-        stbi_set_flip_vertically_on_load(true);
+        stbi_set_flip_vertically_on_load(1);
         uint8_t* data = stbi_load(path.c_str(), &width, &height, &channels, 3);
 
         glGenTextures(1, &id);
@@ -20,7 +20,7 @@ namespace bloom::openGL {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        float maxSupportedAnisotropicFiltering = 0.0f;
+        float maxSupportedAnisotropicFiltering = 0.0F;
         glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxSupportedAnisotropicFiltering);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, maxSupportedAnisotropicFiltering);
 
@@ -31,10 +31,7 @@ namespace bloom::openGL {
         stbi_image_free(data);
     }
 
-    Texture::Texture(Texture&& other) noexcept {
-        id = other.id;
-        originalPath = other.originalPath;
-
+    Texture::Texture(Texture&& other) noexcept : id(other.id), originalPath(std::move(other.originalPath)) {
         other.id = 0;
         other.originalPath = "";
     }
@@ -47,7 +44,7 @@ namespace bloom::openGL {
         glDeleteTextures(1, &id);
 
         id = other.id;
-        originalPath = other.originalPath;
+        originalPath = std::move(other.originalPath);
 
         other.id = 0;
         other.originalPath = "";

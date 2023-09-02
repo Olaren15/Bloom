@@ -1,23 +1,28 @@
 #include "openGlWindow.hpp"
 
+#include "glad/glad.h"
+
 #include <algorithm>
-#include <glad/glad.h>
 #include <SDL2/SDL.h>
 #include <stdexcept>
+
+constexpr int OpenGLVersionMajor = 4;
+constexpr int OpenGLVersionMinor = 6;
+constexpr int DepthBufferSize = 24;
 
 namespace bloom::window {
 
     OpenGlWindow::OpenGlWindow(const int width, const int height) {
-        if (SDL_Init(SDL_INIT_VIDEO)) {
+        if (SDL_Init(SDL_INIT_VIDEO) != 0) {
             throw std::runtime_error(SDL_GetError());
         }
 
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, OpenGLVersionMajor);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, OpenGLVersionMinor);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-        if (!SDL_GL_SetSwapInterval(-1)) {
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, DepthBufferSize);
+        if (SDL_GL_SetSwapInterval(-1) == 0) {
             SDL_GL_SetSwapInterval(1);
         }
 
@@ -29,17 +34,17 @@ namespace bloom::window {
             height,
             SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
         );
-        if (!window) {
+        if (window == nullptr) {
             throw std::runtime_error(SDL_GetError());
         }
 
         glContext = SDL_GL_CreateContext(window);
-        if (!glContext) {
+        if (glContext == nullptr) {
             throw std::runtime_error(SDL_GetError());
         }
 
         // TODO : move the glad loader elsewhere ?? (most likely in the renderer)
-        if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
+        if (gladLoadGLLoader(SDL_GL_GetProcAddress) == 0) {
             throw std::runtime_error("Failed to initialize GLAD");
         }
     }
@@ -58,10 +63,9 @@ namespace bloom::window {
         SDL_GL_SwapWindow(window);
 
         SDL_Event event;
-        while (SDL_PollEvent(&event)) {
+        while (SDL_PollEvent(&event) != 0) {
             if (event.type == SDL_QUIT) {
                 shouldWindowClose = true;
-                break;
             } else if (event.type == SDL_WINDOWEVENT) {
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                     std::ranges::for_each(onResizeCallbacks, [event](const auto& callback) {
@@ -73,8 +77,8 @@ namespace bloom::window {
     }
 
     WindowSize OpenGlWindow::getSize() const {
-        int width;
-        int height;
+        int width = 0;
+        int height = 0;
 
         SDL_GetWindowSize(window, &width, &height);
 

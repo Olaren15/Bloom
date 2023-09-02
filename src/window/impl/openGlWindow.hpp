@@ -1,8 +1,7 @@
 #pragma once
 
-#include "window.hpp"
+#include "../window.hpp"
 
-// ReSharper disable once CppInconsistentNaming
 struct SDL_Window;
 
 namespace bloom::window {

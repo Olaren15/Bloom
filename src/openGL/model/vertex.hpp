@@ -8,4 +8,4 @@ namespace bloom::openGL::model {
         glm::vec3 normal;
         glm::vec2 uv;
     };
-}
+} // namespace bloom::openGL::model

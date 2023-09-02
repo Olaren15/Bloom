@@ -14,7 +14,7 @@ namespace bloom::openGL {
 
         Shader& operator=(const Shader&) = delete;
         Shader& operator=(const Shader&&) = delete;
-        operator GLuint() const;
+        operator GLuint() const; // NOLINT(*-explicit-constructor)
 
         GLuint id;
 
@@ -23,4 +23,4 @@ namespace bloom::openGL {
         static void validateShaderLinking(GLuint shaderProgram);
     };
 
-} // namespace bloom::openGL::shader
+} // namespace bloom::openGL

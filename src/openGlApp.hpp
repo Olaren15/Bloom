@@ -1,7 +1,7 @@
 #pragma once
 
 #include "openGL/renderer.hpp"
-#include "window/openGlWindow.hpp"
+#include "window/impl/openGlWindow.hpp"
 
 namespace bloom {
 
@@ -15,4 +15,4 @@ namespace bloom {
         openGL::Renderer renderer;
     };
 
-}
+} // namespace bloom

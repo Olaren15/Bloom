@@ -11,11 +11,11 @@ namespace bloom::window {
       public:
         Window() = default;
         Window(const Window&) = delete;
-        Window(const Window&&) = delete;
+        Window(Window&&) = delete;
         virtual ~Window() = default;
 
         Window& operator=(const Window&) = delete;
-        Window& operator=(const Window&&) = delete;
+        Window& operator=(Window&&) = delete;
 
         [[nodiscard]] virtual bool isOpen() const = 0;
         virtual void update() = 0;
@@ -24,4 +24,4 @@ namespace bloom::window {
         [[nodiscard]] virtual int getHeight() const = 0;
         virtual void addOnResizeCallback(const OnResizeCallback& callback) = 0;
     };
-}
+} // namespace bloom::window

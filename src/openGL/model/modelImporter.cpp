@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cppcoreguidelines-pro-bounds-pointer-arithmetic"
 #include "modelImporter.hpp"
 
 #include <algorithm>
@@ -27,7 +29,7 @@ namespace bloom::openGL::model {
 
         const aiScene* scene =
             importer.ReadFile(path.string(), aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_SortByPType);
-        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+        if ((scene == nullptr) || ((scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) != 0) || (scene->mRootNode == nullptr)) {
             throw std::runtime_error("Failed to load model");
         }
 
@@ -42,20 +44,20 @@ namespace bloom::openGL::model {
         return Model{std::move(meshes)};
     }
 
-    void accumulateMeshesRecursive(
-        const aiNode* node, const aiScene* scene, std::vector<Mesh>& meshes, const std::filesystem::path& basePath
+    void accumulateMeshesRecursive( // NOLINT(*-no-recursion)
+        const aiNode* node,
+        const aiScene* scene,
+        std::vector<Mesh>& meshes,
+        const std::filesystem::path& basePath
     ) {
-        std::for_each(
-            node->mMeshes,
-            node->mMeshes + node->mNumMeshes,
-            [scene, &meshes, &basePath](const unsigned int meshIndex) {
-                const aiMesh* mesh = scene->mMeshes[meshIndex];
-                std::optional<Mesh> generatedMesh = generateMesh(mesh, scene, basePath);
-                if (generatedMesh.has_value()) {
-                    meshes.push_back(std::move(generatedMesh.value()));
-                }
+        for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+            const unsigned int meshIndex = node->mMeshes[i];
+            const aiMesh* mesh = scene->mMeshes[meshIndex];
+            std::optional<Mesh> generatedMesh = generateMesh(mesh, scene, basePath);
+            if (generatedMesh.has_value()) {
+                meshes.push_back(std::move(generatedMesh.value()));
             }
-        );
+        }
 
         for (unsigned int i = 0; i < node->mNumChildren; i++) {
             accumulateMeshesRecursive(node->mChildren[i], scene, meshes, basePath);
@@ -63,7 +65,7 @@ namespace bloom::openGL::model {
     }
 
     std::optional<Mesh> generateMesh(const aiMesh* mesh, const aiScene* scene, const std::filesystem::path& basePath) {
-        if (!(mesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE)) {
+        if ((mesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE) == 0) {
             std::cout << "Skipped mesh because it is not made of triangles\n";
             return std::nullopt;
         }
@@ -76,12 +78,12 @@ namespace bloom::openGL::model {
         for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
             const aiVector3D position = mesh->mVertices[i];
             const aiVector3D normal = mesh->mNormals[i];
-            const aiVector3D* uv = mesh->mTextureCoords[0];
+            const aiVector3D* uvCoordinates = mesh->mTextureCoords[0];
 
             const Vertex vertex{
                 glm::vec3{position.x, position.y, position.z},
                 glm::vec3{normal.x, normal.y, normal.z},
-                uv == nullptr ? glm::vec2{0.0f, 0.0f} : glm::vec2{uv[i].x, uv[i].y}};
+                uvCoordinates == nullptr ? glm::vec2{0.0F, 0.0F} : glm::vec2{uvCoordinates[i].x, uvCoordinates[i].y}};
 
             vertices.insert(vertices.begin() + i, vertex);
         }
@@ -109,3 +111,5 @@ namespace bloom::openGL::model {
         return Texture{fullPath};
     }
 } // namespace bloom::openGL::model
+
+#pragma clang diagnostic pop

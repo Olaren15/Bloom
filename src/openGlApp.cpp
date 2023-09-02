@@ -12,4 +12,4 @@ namespace bloom {
             renderer.drawFrame();
         }
     }
-}
+} // namespace bloom

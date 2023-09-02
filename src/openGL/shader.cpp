@@ -43,7 +43,7 @@ namespace bloom::openGL {
     void Shader::validateShaderCompilation(const GLuint shader) {
         GLint compilationSuccess = 0;
         glGetShaderiv(shader, GL_COMPILE_STATUS, &compilationSuccess);
-        if (!compilationSuccess) {
+        if (compilationSuccess == 0) {
             GLint logLength = 0;
             glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
             std::vector<GLchar> logMessage(logLength);
@@ -55,7 +55,7 @@ namespace bloom::openGL {
     void Shader::validateShaderLinking(const GLuint shaderProgram) {
         GLint linkingSuccess = 0;
         glGetProgramiv(shaderProgram, GL_LINK_STATUS, &linkingSuccess);
-        if (!linkingSuccess) {
+        if (linkingSuccess == 0) {
             GLint logLength = 0;
             glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &logLength);
             std::vector<GLchar> logMessage(logLength);
@@ -64,4 +64,4 @@ namespace bloom::openGL {
         }
     }
 
-}
+} // namespace bloom::openGL

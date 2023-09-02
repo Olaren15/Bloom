@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "bloom",
+  "version": "0.0.1",
+  "dependencies": [
+    "glm",
+    "sdl2",
+    "assimp",
+    {
+      "name": "glad",
+      "features": [
+        "gl-api-46"
+      ]
+    },
+    "stb"
+  ]
+}
