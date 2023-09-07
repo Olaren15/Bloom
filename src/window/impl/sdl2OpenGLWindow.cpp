@@ -1,10 +1,11 @@
-#include "openGlWindow.hpp"
+#include "sdl2OpenGLWindow.hpp"
 
 #include "glad/glad.h"
 
 #include <algorithm>
 #include <SDL2/SDL.h>
 #include <stdexcept>
+#include <utility>
 
 constexpr int OpenGLVersionMajor = 4;
 constexpr int OpenGLVersionMinor = 6;
@@ -12,7 +13,7 @@ constexpr int DepthBufferSize = 24;
 
 namespace bloom::window {
 
-    OpenGlWindow::OpenGlWindow(const int width, const int height) {
+    SDL2OpenGLWindow::SDL2OpenGLWindow(const int width, const int height) {
         if (SDL_Init(SDL_INIT_VIDEO) != 0) {
             throw std::runtime_error(SDL_GetError());
         }
@@ -49,17 +50,17 @@ namespace bloom::window {
         }
     }
 
-    OpenGlWindow::~OpenGlWindow() {
+    SDL2OpenGLWindow::~SDL2OpenGLWindow() {
         SDL_GL_DeleteContext(glContext);
         SDL_DestroyWindow(window);
         SDL_Quit();
     }
 
-    bool OpenGlWindow::isOpen() const {
+    bool SDL2OpenGLWindow::isOpen() const {
         return !shouldWindowClose;
     }
 
-    void OpenGlWindow::update() {
+    void SDL2OpenGLWindow::update() {
         SDL_GL_SwapWindow(window);
 
         SDL_Event event;
@@ -73,10 +74,12 @@ namespace bloom::window {
                     });
                 }
             }
+
+            std::ranges::for_each(onSdlEventCallbacks, [event](const auto& callback) { callback(event); });
         }
     }
 
-    WindowSize OpenGlWindow::getSize() const {
+    WindowSize SDL2OpenGLWindow::getSize() const {
         int width = 0;
         int height = 0;
 
@@ -85,16 +88,36 @@ namespace bloom::window {
         return WindowSize{width, height};
     }
 
-    int OpenGlWindow::getWidth() const {
+    int SDL2OpenGLWindow::getWidth() const {
         return getSize().width;
     }
 
-    int OpenGlWindow::getHeight() const {
+    int SDL2OpenGLWindow::getHeight() const {
         return getSize().height;
     }
 
-    void OpenGlWindow::addOnResizeCallback(const OnResizeCallback& callback) {
-        onResizeCallbacks.push_back(callback);
+    std::list<OnResizeCallback>::iterator SDL2OpenGLWindow::registerOnResizeCallback(const OnResizeCallback& callback) {
+        return onResizeCallbacks.insert(onResizeCallbacks.end(), callback);
     }
 
+    void SDL2OpenGLWindow::removeOnResizeCallback(std::list<OnResizeCallback>::iterator iterator) {
+        onResizeCallbacks.erase(iterator);
+    }
+
+    SDL_Window* SDL2OpenGLWindow::getActualSdlWindow() {
+        return window;
+    }
+
+    SDL_GLContext SDL2OpenGLWindow::getOpenGLContext() {
+        return glContext;
+    }
+
+    std::list<OnSdlEventCallback>::iterator
+        SDL2OpenGLWindow::registerOnSdlEventCallback(const OnSdlEventCallback& callback) {
+        return onSdlEventCallbacks.insert(onSdlEventCallbacks.end(), callback);
+    }
+
+    void SDL2OpenGLWindow::removeOnSdlEventCallback(std::list<OnSdlEventCallback>::iterator iterator) {
+        onSdlEventCallbacks.erase(std::move(iterator));
+    }
 } // namespace bloom::window

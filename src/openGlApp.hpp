@@ -1,7 +1,8 @@
 #pragma once
 
 #include "openGL/renderer.hpp"
-#include "window/impl/openGlWindow.hpp"
+#include "window/impl/sdl2OpenGLWindow.hpp"
+#include "ui/uiRenderer.hpp"
 
 namespace bloom {
 
@@ -11,8 +12,9 @@ namespace bloom {
         void run();
 
       private:
-        window::OpenGlWindow window;
-        openGL::Renderer renderer;
+        window::SDL2OpenGLWindow window;
+        openGL::Renderer graphicsRenderer;
+        ui::UiRenderer uiRenderer;
     };
 
 } // namespace bloom

@@ -16,16 +16,21 @@ constexpr float NearPlane = 0.1F;
 constexpr float FarPlane = 100.0F;
 
 namespace bloom::openGL {
-    Renderer::Renderer(window::OpenGlWindow* window) :
+    Renderer::Renderer(window::SDL2OpenGLWindow* window) :
       shader{"data/shaders/openGL/default.vert.glsl", "data/shaders/openGL/default.frag.glsl"},
-      model{model::importModelFromFile("D:/Downloads/silent_ash/scene.gltf")} {
-        window->addOnResizeCallback([this](const int width, const int height) { onWindowResize(width, height); });
+      model{model::importModelFromFile("D:/Downloads/silent_ash/scene.gltf")},
+      window(window) {
+        onResizeCallbackRef = window->registerOnResizeCallback([this](const int width, const int height) {
+            onWindowResize(width, height);
+        });
 
         const auto [width, height] = window->getSize();
         onWindowResize(width, height);
 
         glEnable(GL_DEPTH_TEST);
+
         glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(
             []([[maybe_unused]] GLenum source, // NOLINT(*-easily-swappable-parameters)
                [[maybe_unused]] GLenum type,
@@ -33,9 +38,17 @@ namespace bloom::openGL {
                [[maybe_unused]] GLenum severity,
                [[maybe_unused]] GLsizei length,
                const GLchar* message,
-               [[maybe_unused]] const void* userParam) { std::cout << message << "\n"; },
+               [[maybe_unused]] const void* userParam) {
+                if (severity != GL_DEBUG_SEVERITY_NOTIFICATION) {
+                    std::cout << message << "\n";
+                }
+            },
             nullptr
         );
+    }
+
+    Renderer::~Renderer() {
+        window->removeOnResizeCallback(onResizeCallbackRef);
     }
 
     void Renderer::drawFrame() const {
@@ -76,4 +89,5 @@ namespace bloom::openGL {
         glViewport(0, 0, width, height);
         aspectRatio = static_cast<float>(width) / static_cast<float>(height);
     }
+
 } // namespace bloom::openGL

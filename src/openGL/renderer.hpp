@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../window/impl/openGlWindow.hpp"
+#include "../window/impl/sdl2OpenGLWindow.hpp"
+#include "../window/window.hpp"
 #include "model/model.hpp"
 #include "shader.hpp"
 
@@ -9,11 +10,11 @@ namespace bloom::openGL {
     class Renderer {
       public:
         Renderer() = delete;
-        explicit Renderer(window::OpenGlWindow* window);
+        explicit Renderer(window::SDL2OpenGLWindow* window);
         void updateMatrices() const;
         Renderer(const Renderer&) = delete;
         Renderer(const Renderer&&) = delete;
-        ~Renderer() = default;
+        ~Renderer();
 
         Renderer& operator=(const Renderer&) = delete;
         Renderer& operator=(const Renderer&&) = delete;
@@ -25,6 +26,8 @@ namespace bloom::openGL {
 
         Shader shader;
         model::Model model;
+        window::SDL2OpenGLWindow* window;
+        std::list<window::OnResizeCallback>::iterator onResizeCallbackRef;
 
         void onWindowResize(int width, int height);
     };
