@@ -11,6 +11,10 @@ namespace bloom {
         OpenGLApp();
         void run();
 
+        void drawUi();
+        void showMenuBar();
+        void openFile();
+
       private:
         window::SDL2OpenGLWindow window;
         openGL::Renderer graphicsRenderer;

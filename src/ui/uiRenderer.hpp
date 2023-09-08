@@ -21,7 +21,8 @@ namespace bloom::ui {
         UiRenderer& operator=(const UiRenderer&) = delete;
         UiRenderer& operator=(UiRenderer&&) = delete;
 
-        void drawFrame();
+        void startFrame();
+        void endFrame();
 
       private:
         std::unique_ptr<backends::InputBackend> inputBackend;

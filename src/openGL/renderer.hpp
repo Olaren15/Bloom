@@ -19,13 +19,14 @@ namespace bloom::openGL {
         Renderer& operator=(const Renderer&) = delete;
         Renderer& operator=(const Renderer&&) = delete;
 
+        void setModel(const std::filesystem::path& modelPath);
         void drawFrame() const;
 
       private:
         float aspectRatio = 0.0F;
 
         Shader shader;
-        model::Model model;
+        std::unique_ptr<model::Model> model = nullptr;
         window::SDL2OpenGLWindow* window;
         std::list<window::OnResizeCallback>::iterator onResizeCallbackRef;
 

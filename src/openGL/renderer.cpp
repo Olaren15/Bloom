@@ -17,9 +17,7 @@ constexpr float FarPlane = 100.0F;
 
 namespace bloom::openGL {
     Renderer::Renderer(window::SDL2OpenGLWindow* window) :
-      shader{"data/shaders/openGL/default.vert.glsl", "data/shaders/openGL/default.frag.glsl"},
-      model{model::importModelFromFile("D:/Downloads/silent_ash/scene.gltf")},
-      window(window) {
+      shader{"data/shaders/openGL/default.vert.glsl", "data/shaders/openGL/default.frag.glsl"}, window(window) {
         onResizeCallbackRef = window->registerOnResizeCallback([this](const int width, const int height) {
             onWindowResize(width, height);
         });
@@ -51,6 +49,10 @@ namespace bloom::openGL {
         window->removeOnResizeCallback(onResizeCallbackRef);
     }
 
+    void Renderer::setModel(const std::filesystem::path& modelPath) {
+        this->model = std::make_unique<model::Model>(model::importModelFromFile(modelPath));
+    }
+
     void Renderer::drawFrame() const {
         glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -58,13 +60,15 @@ namespace bloom::openGL {
         glUseProgram(shader);
         updateMatrices();
 
-        for (const model::Mesh& mesh : model.meshes) {
-            glUniform1i(4, 0); // Use texture 0 for our baseColor sampler
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, mesh.texture);
+        if (model) {
+            for (const model::Mesh& mesh : model->meshes) {
+                glUniform1i(4, 0); // Use texture 0 for our baseColor sampler
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, mesh.texture);
 
-            glBindVertexArray(mesh.vertexArray);
-            glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(mesh.indices.size()), GL_UNSIGNED_INT, nullptr);
+                glBindVertexArray(mesh.vertexArray);
+                glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(mesh.indices.size()), GL_UNSIGNED_INT, nullptr);
+            }
         }
     }
 

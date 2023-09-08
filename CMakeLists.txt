@@ -12,6 +12,7 @@ find_package(assimp CONFIG REQUIRED)
 find_package(Stb REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
+find_package(unofficial-nativefiledialog CONFIG REQUIRED)
 
 add_subdirectory(src)
 add_subdirectory(external)

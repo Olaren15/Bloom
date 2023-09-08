@@ -25,16 +25,15 @@ namespace bloom::ui {
         ImGui::DestroyContext();
     }
 
-    void UiRenderer::drawFrame() {
+    void UiRenderer::startFrame() {
         renderingBackend->beginFrame();
         inputBackend->beginFrame();
         ImGui::NewFrame();
+    }
 
-        ImGui::ShowDemoWindow();
-        // draw stuff
-
+    void UiRenderer::endFrame() {
         ImGui::Render();
         renderingBackend->drawFrame(ImGui::GetDrawData());
     }
 
-} // namespace bloom::ui::imgui
+} // namespace bloom::ui

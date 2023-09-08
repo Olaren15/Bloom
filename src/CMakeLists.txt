@@ -53,4 +53,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         stb
         assimp::assimp
         imgui::imgui
+        unofficial::nativefiledialog::nfd
 )
