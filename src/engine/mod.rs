@@ -87,7 +87,9 @@ impl BloomEngine {
                     .with_prevent_default(false);
             } else {
                 use winit::dpi::LogicalSize;
-                builder = builder.with_inner_size(LogicalSize::new(1920, 1080));
+                builder = builder
+                    .with_inner_size(LogicalSize::new(1920, 1080))
+                    .with_title("Bloom");
             }
         }
 

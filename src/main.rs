@@ -1,4 +1,5 @@
 use wgpu::SurfaceError;
+
 use crate::engine::app::BloomApplication;
 use crate::engine::BloomEngine;
 use crate::engine::renderer::Renderer;
@@ -26,23 +27,28 @@ impl BloomApplication for Application {
             label: Some("Render Encoder")
         });
 
-        encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: Some("Render Pass"),
-            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                view: &view,
-                resolve_target: None,
-                ops: wgpu::Operations {
-                    load: wgpu::LoadOp::Clear(wgpu::Color {
-                        r: 0.1,
-                        g: 0.2,
-                        b: 0.3,
-                        a: 1.0,
-                    }),
-                    store: true,
-                },
-            })],
-            depth_stencil_attachment: None,
-        });
+        {
+            let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("Render Pass"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: &view,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color {
+                            r: 0.1,
+                            g: 0.2,
+                            b: 0.3,
+                            a: 1.0,
+                        }),
+                        store: true,
+                    },
+                })],
+                depth_stencil_attachment: None,
+            });
+
+            render_pass.set_pipeline(&renderer.render_pipeline);
+            render_pass.draw(0..3, 0..1);
+        }
 
         renderer.queue.submit(std::iter::once(encoder.finish()));
         output.present();
@@ -51,8 +57,9 @@ impl BloomApplication for Application {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn main() {
-    pollster::block_on(BloomEngine::run_app(Application));
+#[pollster::main]
+async fn main() {
+    BloomEngine::run_app(Application).await;
 }
 
 #[cfg(target_arch = "wasm32")]
