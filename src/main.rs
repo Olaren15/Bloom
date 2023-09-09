@@ -1,48 +1,62 @@
-use winit::event::{Event, WindowEvent};
-use winit::event_loop::{ControlFlow, EventLoop};
-use winit::window::WindowBuilder;
+use wgpu::SurfaceError;
+use crate::engine::app::BloomApplication;
+use crate::engine::BloomEngine;
+use crate::engine::renderer::Renderer;
 
-fn main() {
-    init_logger();
+mod engine;
 
-    let event_loop = EventLoop::new();
-    let window = WindowBuilder::new()
-        .build(&event_loop).unwrap();
+struct Application;
 
-    event_loop.run(move |event, _, control_flow| {
-        match event {
-            Event::NewEvents(_) => {}
-            Event::WindowEvent {
-                ref event,
-                window_id
-            } => {
-                if window_id == window.id() && event == &WindowEvent::CloseRequested {
-                    *control_flow = ControlFlow::Exit;
-                }
-            }
-            Event::DeviceEvent { .. } => {}
-            Event::UserEvent(_) => {}
-            Event::Suspended => {}
-            Event::Resumed => {}
-            Event::MainEventsCleared => {}
-            Event::RedrawRequested(_) => {
-                // Draw stufff
-            }
-            Event::RedrawEventsCleared => {
-                window.request_redraw();
-            }
-            Event::LoopDestroyed => {}
-        }
-    })
+impl BloomApplication for Application {
+    fn initialise(&mut self) {
+        log::info!("Starting up...")
+    }
+
+    fn destroy(&mut self) {
+        log::info!("Shutting down...");
+    }
+
+    fn update(&mut self) {}
+
+    fn draw(&mut self, renderer: &Renderer) -> Result<(), SurfaceError> {
+        let output = renderer.surface.get_current_texture()?;
+        let view = output.texture.create_view(&wgpu::TextureViewDescriptor::default());
+
+        let mut encoder = renderer.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("Render Encoder")
+        });
+
+        encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: Some("Render Pass"),
+            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                view: &view,
+                resolve_target: None,
+                ops: wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(wgpu::Color {
+                        r: 0.1,
+                        g: 0.2,
+                        b: 0.3,
+                        a: 1.0,
+                    }),
+                    store: true,
+                },
+            })],
+            depth_stencil_attachment: None,
+        });
+
+        renderer.queue.submit(std::iter::once(encoder.finish()));
+        output.present();
+        Ok(())
+    }
 }
 
-fn init_logger() {
-    cfg_if::cfg_if! {
-        if #[cfg(target_arch = "wasm32")] {
-            std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-            console_log::init_with_level(log::Level::Warn).expect("Couldn't initialize logger");
-        } else {
-            env_logger::init();
-        }
-    }
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    pollster::block_on(BloomEngine::run_app(Application));
+}
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen::prelude::wasm_bindgen(main)]
+pub async fn main() {
+    BloomEngine::run_app(Application).await;
 }
